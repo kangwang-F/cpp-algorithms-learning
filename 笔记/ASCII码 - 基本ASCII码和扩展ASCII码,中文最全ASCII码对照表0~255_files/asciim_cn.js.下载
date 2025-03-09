@@ -1,4 +1,0 @@
-$(window).scroll(function() {
-        var t = $(window).scrollTop();
-        t > 395 ? $(".floatNav").fadeIn() : $(".floatNav").fadeOut()
-});
