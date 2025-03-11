@@ -262,7 +262,8 @@ class tree{
         if(!root)return true;
         return compare(root->right,root->left);
     }
-//09.二叉树的最大深度
+//09.二叉树的最大深度【后序遍历 求 高度 代表 深度】
+        //     方法二：     (充分表现出求深度 回溯的过程)
     int maxDepth(TreeNode* root) {
         if(!root)return 0;
         return 1+max(maxDepth(root->left),maxDepth(root->right));
@@ -336,8 +337,130 @@ class tree{
         }
         return 1+countNodes_trait(root->right)+countNodes_trait(root->left);
     }
-};
+//12.平衡二叉树【我的想法左子树高度-右子树高度 abs > 1 => false】
+    //左右子树 高度差 < 1   [这里需要递归（左子树的子树也要满足上述要求....）]
+//因为求深度可以从上到下去查 所以需要前序遍历（中左右），而高度只能从下到上去查，所以只能后序遍历（左右中）
 
+//此时大家应该明白了既然要求比较高度，必然是要后序遍历。
+class Solution {
+    public://前序遍历【求深度】
+        int result;
+        void getDepth(TreeNode* node, int depth) {
+            result = depth > result ? depth : result; // 中
+    
+            if (node->left == NULL && node->right == NULL) return ;
+    
+            if (node->left) { // 左
+                depth++;    // 深度+1
+                getDepth(node->left, depth);
+                depth--;    // 回溯，深度-1
+            }
+            if (node->right) { // 右
+                depth++;    // 深度+1
+                getDepth(node->right, depth);
+                depth--;    // 回溯，深度-1
+            }
+            return ;
+        }
+        int maxDepth(TreeNode* root) {
+            result = 0;
+            if (root == NULL) return result;
+            getDepth(root, 1);
+            return result;
+        }
+    };
+    // int Height(TreeNode*root){
+    //     if(!root)return 0;
+    //     return 1+max(Height(root->left),Height(root->right));
+    // }
+    // bool isBalanced(TreeNode* root) {
+    //     if(!root)return true;
+    //     return !(abs(Height(root->left)-Height(root->right)) > 1);
+    // }
+//后序遍历 
+    int GetHeight(TreeNode* root){
+        if(!root) return 0;
+        int LH = GetHeight(root->left);
+        if(LH==-1)return -1;
+        int RH = GetHeight(root->right);
+        if(RH==-1)return -1;
+        int res = abs(LH-RH);
+        return (res>1)?-1:1+max(LH,RH);
+    }
+    bool isBalanced(TreeNode* root) {
+        if(!root)return true;
+        return !(GetHeight(root)==-1);
+    }
+//13.返回二叉树所有路径[从上向下遍历：前序遍历]
+    //遍历完一条路径后需要                  回溯
+
+//那有同学可能想，为什么不去定义一个 string& path 这样的函数参数呢，然后也可能在递归函数中展现回溯的过程，
+// 但关键在于，path += to_string(cur->val); 每次是加上一个数字，这个数字如果是个位数，那好说，就调用一次path.pop_back()，但如果是 十位数，百位数，千位数呢？
+//  百位数就要调用三次path.pop_back()，才能实现对应的回溯操作，这样代码实现就太冗余了。
+    void traversal(TreeNode* cur,vector<string>& res,vector<int>& path){
+        path.push_back(cur->val);
+        if(cur->left==NULL&&cur->right==NULL){
+            string spath;
+           for(int i =0;i<path.size()-1;i++){
+            spath += to_string(path[i]);
+            spath += "->";
+           } 
+           spath += to_string(path[path.size()-1]);
+           path.pop_back(); //回溯
+           res.push_back(spath);
+        }
+        
+        if(cur->left){    
+            traversal(cur->left,res,path);
+            path.pop_back();//回溯
+        }
+        
+        if(cur->right){
+            traversal(cur->right,res,path);
+            path.pop_back();//回溯 
+        }
+    }
+//以下是精简版本
+    void traversal_brief(TreeNode* cur,string path,vector<string>&res){
+        path += to_string(cur->val);
+        if(cur->left&&cur->right){
+            res.push_back(path);
+        }
+        if(cur->left){
+            traversal_brief(cur->left,path+"->",res);//隐含回溯【值传递】
+        }
+        if(cur->right){
+            traversal_brief(cur->right,path+"->",res);//隐含回溯【值传递】
+        }
+    }
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> res;
+        vector<int>path;
+        if(!root)return {};
+        traversal(root,res,path);
+        return res;      
+    }
+//14.相同的树【对标 对称二叉树】
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if(p==NULL&&q!=NULL)return false;
+        if(p!=NULL&&q==NULL)return false;
+        if(p==NULL&&q==NULL)return true;
+        if(p->val!=q->val)return false;
+        bool left = isSameTree(p->left,q->left);
+        bool right = isSameTree(p->right,q->right);
+        return left&&right;
+    }
+//15.另一个 树的子树
+    //我的想法：while循环找目标的根节点->在调用issame函数
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        if(root==NULL)return false;
+        bool mid = false;
+        if(root->val==subRoot->val)mid = isSameTree(root,subRoot);
+        bool left = isSubtree(root->left,subRoot);
+        bool right = isSubtree(root->right,subRoot);
+        return mid||left||right;
+    }
+};
 //N叉树的最大深度
 // Definition for a Node.
 class Node {
@@ -360,15 +483,15 @@ class Solution {
     public:
 //这里是深度优先搜索
 //用层序遍历【广度优先亦可】
-        int maxDepth(Node* root) {
-            if(!root)return 0;
-            int max = 0;     
-            for(auto i:root->children){
-                int a = maxDepth(i);
-                max = (a>max)?a:max;
-            }
-            return max+1;
+    int maxDepth(Node* root) {
+        if(!root)return 0;
+        int max = 0;     
+        for(auto i:root->children){
+            int a = maxDepth(i);
+            max = (a>max)?a:max;
         }
+        return max+1;
+    }
         
 };
 int main(){
