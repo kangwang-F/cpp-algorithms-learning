@@ -230,6 +230,168 @@ class Solution {
             return result;
         }
     };
+//8.子集问题
+//  不仅收集叶子节点，而是每个节点
+class Solution {
+    public:
+    vector<vector<int>> result;
+    vector<int> path;
+        void backtracking(vector<int>& nums,int startindex){
+            //这里要提前插入，防止递归终止
+            result.push_back(path);
+            if(startindex>=nums.size()){
+                return;
+            }
+            for(int i = startindex;i<nums.size();i++){
+                path.push_back(nums[i]);
+                backtracking(nums,i+1);
+                path.pop_back();
+            }
+        }
+        vector<vector<int>> subsets(vector<int>& nums) {
+            backtracking(nums,0);
+            return result;
+        }
+    };
+//9.子集2【传进来的数组中包含重复元素】
+//本题也可以不使用used数组来去重，因为递归的时候下一个startIndex是i+1而不是0。
+// 如果要是全排列的话，每次要从0开始遍历，为了跳过已入栈的元素，需要使用used。
+class Solution {
+    public:
+    vector<vector<int>> result;
+    vector<int>path;
+    vector<bool> used;
+        void backtracking(vector<int>& nums,int startindex){
+            result.push_back(path);
+            if(startindex>=nums.size())return;
+            for(int i =startindex;i<nums.size();i++){
+                if(i!=0&&nums[i]==nums[i-1]&&used[i-1]==false){
+                    continue;
+                }
+                /*
+                    如果不用used数组
+                    if(i>startindex&&nums[i]==nums[i-1])效果相同
+                */
+                path.push_back(nums[i]);
+                used[i] = true;
+                backtracking(nums,i+1);
+                used[i] = false;
+                path.pop_back();
+            }
+        }
+        vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+            sort(nums.begin(),nums.end());
+            used.resize(nums.size(),false);
+            backtracking(nums,0);
+            return result;
+        }
+    };
+//10.递增子序列<这里集合中至少得两个元素>【有重复元素】
+//【这里不允许排序 -- 子序列的顺序要符合原来数组中的顺序】
+#include<set>
+#include<unordered_set>
+class Solution {
+    public:
+    vector<int> path;
+    vector<vector<int>> result;
+        void backtracking(vector<int>& nums,int startindex){
+            //万万不可放到for里面
+            if(path.size()>1){
+                result.push_back(path);
+            }
+            if(startindex==nums.size()){return;}
+            unordered_set<int> uset;
+            for(int i =startindex;i<nums.size();i++){
+                // if(i==0||nums[i]>path.back()){
+                //     if(uset.find(nums[i])==uset.end()){
+                //         uset.insert(nums[i]);
+                //         path.push_back(nums[i]);
+                //         backtracking(nums,i+1);
+                //         path.pop_back();
+                //     }
+                // }
+                //          这里如果使用vector<int>.back()一定确保vector有 元素
+                if((!path.empty()&&nums[i]<path.back())
+                    || uset.find(nums[i])!=uset.end()){
+                        continue;
+                    }
+                uset.insert(nums[i]);
+                path.push_back(nums[i]);
+                backtracking(nums,i+1);
+                path.pop_back();
+            }
+        }
+        vector<vector<int>> findSubsequences(vector<int>& nums) {
+            backtracking(nums,0);
+            return result;
+        }
+    };
+//11.全排列
+class Solution {
+    public:
+    vector<vector<int>> result;
+    vector<int> path;
+    vector<bool> uset;
+        void backtracking(vector<int>& nums){
+            if(path.size()==nums.size()){
+                result.push_back(path);
+                return;
+            }
+            for(int i = 0;i<nums.size();i++){
+                if(uset[i]==true)continue;
+                uset[i] = true;
+                path.push_back(nums[i]);
+                backtracking(nums);
+                path.pop_back();
+                uset[i] = false;
+            }
+        }
+        vector<vector<int>> permute(vector<int>& nums) {
+            uset.resize(nums.size(),false);
+            backtracking(nums);
+            return result;
+        }
+    };
+//全排列2
+//给定一个可包含重复数字的序列，要返回所有不重复的全排列。
+class Solution {
+    public:
+    vector<vector<int>> result;
+    vector<int> path;
+    vector<bool> uset;
+        void backtracking(vector<int>& nums){
+            if(path.size()==nums.size()){
+                result.push_back(path);
+                return;
+            }
+            for(int i = 0;i<nums.size();i++){
+                if(uset[i]==true)continue;
+                /*这里uset[i-1]==true表示树枝去重；==false表示树层去重【因为全排列【不收集<个数的】】
+                对于排列问题，树层上去重和树枝上去重，都是可以的，但是树层上去重效率更高！*/
+                if(i!=0&&nums[i]==nums[i-1]&&uset[i-1]==false)continue;
+                uset[i] = true;
+                path.push_back(nums[i]);
+                backtracking(nums);
+                path.pop_back();
+                uset[i] = false;
+            }
+        }
+        vector<vector<int>> permuteUnique(vector<int>& nums) {
+            uset.resize(nums.size(),false);
+            sort(nums.begin(),nums.end());
+            backtracking(nums);
+            return result;
+        }
+    };
+// 重新安排行程
+// HARD 隔天再写
+class Solution {
+    public:
+        vector<string> result;
+        vector<string> findItinerary(vector<vector<string>>& tickets) {
+            return result;    
+        }
+    };
 int main(){
     return 0;
 }
