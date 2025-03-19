@@ -352,7 +352,7 @@ class Solution {
             return result;
         }
     };
-//全排列2
+//12.全排列2
 //给定一个可包含重复数字的序列，要返回所有不重复的全排列。
 class Solution {
     public:
@@ -383,13 +383,177 @@ class Solution {
             return result;
         }
     };
-// 重新安排行程
+//13. 重新安排行程[去的地方从小到大排序]
+                //这里可以用map[map会对key进行默认排序]
 // HARD 隔天再写
+//难还难在容器的选择和使用上。
+#include<map>
+#include<unordered_map>
 class Solution {
     public:
         vector<string> result;
+        //出发地 map(目标地，航班次数)
+        unordered_map<string,map<string,int>> tragets;
+        bool backtracking(int ticketNum){
+            if(result.size()==ticketNum+1){
+                return true;
+            }
+    //加上引用之后，就必须在 string 前面加上 const，因为map中的key 是不可修改了，这就是语法规定了。
+    //for(pair<const string,int>& traget: tragets[result[result.size()-1]])
+            for(auto& traget : tragets[result[result.size()-1]]){
+                if(traget.second>0){
+                    //记录到达机场没有飞过
+                    traget.second--;
+                    result.push_back(traget.first);
+                    if(backtracking(ticketNum))return true;
+                    traget.second++;
+                    result.pop_back();
+                }
+                
+            }
+            return false;
+        }
         vector<string> findItinerary(vector<vector<string>>& tickets) {
+            for(auto i : tickets){
+                tragets[i[0]][i[1]]++;
+            }
+            result.push_back("JFK");
+            backtracking(tickets.size());
             return result;    
+        }
+    };
+//14.N皇后
+//求出所有解法【返回值为void【整棵树】】
+class Solution {
+    public:
+    vector<vector<string>> result;
+    vector<string> path;
+        bool isvaild(int row,int col){
+        //因为我们对行进行了回溯，所以不用检查 行和本身 合法    
+            if(path[row][col]=='Q')return false;
+        
+            // for(int i = 0;i<path.size();i++){
+            //     if(col==i)continue;
+            //     if(path[row][i]=='Q')return false;
+            // }
+
+            //检查列
+            for(int i = 0;i<path.size();i++){
+                if(row==i)continue;
+                if(path[i][col]=='Q')return false;
+            }
+
+            // int minNUM = min(row,col);
+            // int maxNUM = max(row,col);
+            // for(int i = 0;i<=minNUM;i++){
+            //     if(path[row-i][col-i]=='Q')return false;
+            // }
+            // for(int i = 0;i<=(path.size()-maxNUM-1);i++){
+            //     if(path[row+i][col+i]=='Q')return false;
+            // }
+            //因为是从上往下填的
+            //所以只用检查之前被填的地方的Q
+             // 检查 45度角是否有皇后
+            for (int i = row - 1, j = col - 1; i >=0 && j >= 0; i--, j--) {
+                if (path[i][j] == 'Q') {
+                    return false;
+                }
+            }
+            // 检查 135度角是否有皇后
+            for(int i = row - 1, j = col + 1; i >= 0 && j < path.size(); i--, j++) {
+                if (path[i][j] == 'Q') {
+                    return false;
+                }
+            }
+            return true;
+        }
+        void backtracking(int QNums,int Q,int row){
+            if(Q==0){
+                result.push_back(path);
+                return;
+            }
+            //这里只需要在本列中找位置插入
+            /*【row是传进来的，保证一横只有一个Q】
+            //即下面的for循环是在 新的一行 中搜索
+            for (int col = 0; col < n; col++) {
+                if (isValid(row, col, chessboard, n)) { // 验证合法就可以放
+                    chessboard[row][col] = 'Q'; // 放置皇后
+                    backtracking(n, row + 1, chessboard);
+                    chessboard[row][col] = '.'; // 回溯，撤销皇后
+            }
+    }*/
+            for(int i = row;i <QNums;i++){
+                for(int j = 0;j<QNums;j++){
+                    if(path[i][j]=='.'&&isvaild(i,j)){
+                        path[i][j] = 'Q';
+                        backtracking(QNums,Q-1,i+1);
+                        path[i][j] = '.';
+                    }
+                }
+            }
+        }
+        vector<vector<string>> solveNQueens(int n) {
+            path.resize(n);
+            for(int i = 0;i<n;i++){
+                for(int j = 0;j<n;j++)path[i] +="."; 
+            }
+            backtracking(n,n,0);
+            return result;
+        }
+    };
+// 上面的回溯算法：递归函数中【for*1 仅仅遍历列】
+//15.数独
+class Solution {
+    public:
+        bool isvaild(vector<vector<char>>& board,int row,int col,int num){
+            for(int i = 0;i<board.size();i++){
+                if(board[i][col]==num+'0')return false;
+            }
+            for(int i = 0;i<board.size();i++){
+                if(board[row][i] ==num+'0')return false;
+            }
+            
+            for(int i = (row/3)*3;i<((row/3)*3+3);i++){
+                for(int j = (col/3)*3;j<((col/3)*3+3);j++){
+                    if(board[i][j]==num+'0')return false;
+                }
+            }
+            return true;
+        }
+        bool backtracking(vector<vector<char>>& board,int row,int coll){
+            if(row==9)return true;
+
+            for(int col = coll;col < 9;col++){
+                if(board[row][col]!='.'){
+                    if(col == 8){
+                        if(backtracking(board,row+1,0))return true;
+                    }
+                    continue;
+                }
+                for(int i = 1;i<=9;i++){
+                    if(isvaild(board,row,col,i)){
+                        board[row][col] = i+'0';
+                        if(col==8){
+                            if(backtracking(board,row+1,0))return true;
+                        }
+                        else{
+                            if(backtracking(board,row,col+1))return true;
+                        }
+                        
+                        board[row][col] = '.';
+                    }
+                }
+                return false;
+            }
+    //对于我的代码来说没必要
+    //  遍历完没有返回false，说明找到了合适棋盘位置了
+            return true;
+            
+        }
+        //要求：结果唯一 + 在原来的数组中操作
+        void solveSudoku(vector<vector<char>>& board) {
+            backtracking(board,0,0);
+            return;
         }
     };
 int main(){
