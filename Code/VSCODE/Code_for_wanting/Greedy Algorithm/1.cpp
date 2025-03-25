@@ -146,7 +146,7 @@ class Solution {
             return false;
         }
     };
-//6.跳跃问题2
+//6.跳跃问题2【以最小的步数增加最大的覆盖范围，直到覆盖范围覆盖了终点】
 class Solution {
 //局部最优：当前可移动距离尽可能多走，如果还没到终点，步数再加一。
 //整体最优：一步尽可能多走，从而达到最少步数。
@@ -193,6 +193,99 @@ class Solution{
         }return result;
     }
 };
+//K次取反后求最大和
+/*
+    贪心的思路，局部最优：让绝对值大的负数变为正数，当前数值达到最大，整体最优：整个数组和达到最大。
+    局部最优可以推出全局最优。
+    那么如果将负数都转变为正数了，K依然大于0，此时的问题是一个有序正整数序列，
+    如何转变K次正负，让 数组和 达到最大。
+    那么又是一个贪心：局部最优：只找数值最小的正整数进行反转，
+    当前数值和可以达到最大（例如正整数数组{5, 3, 1}，
+    反转1 得到-1 比 反转5得到的-5 大多了），全局最优：整个 数组和 达到最大。
+    */
+//没有处理，数组已经遍历完了，但是k仍不为0【k>nums.size()】
+//而且频繁更新result，是的代码变得冗余
+//【我最初的想法是，一遍过，不需要再一次循环累加nums，显然失败】
+class Solution_error {
+    public:
+        int largestSumAfterKNegations(vector<int>& nums, int k) {
+            // sort(nums.begin(),nums.end(),[](int a,int b){return a<b;});
+            sort(nums.begin(),nums.end());
+            int result = 0;
+            for(int i = 0;i<nums.size();i++){
+                if(k==0){
+                    result+=nums[i];
+                    continue;
+                }
+            //第一次贪心：遇到负数，要变正
+                if(nums[i]<0){
+                    nums[i]*=-1;
+                    k--;
+                    result+=nums[i];
+                }
+                else{
+            //第二次贪心：遇到正的要可着绝对值小的变【k为奇数】
+                    if(i==0){
+                        if(k%2!=0){nums[i]*=(-1);k=0;}
+                        result+=nums[i];
+                    }
+                    else{
+                        if(k%2==0){
+                            k=0;
+                            result+=nums[i];
+                        }
+                        else{
+                            if(abs(nums[i])>abs(nums[i-1])){
+                                result -= (nums[i-1]*2);
+                                result+= nums[i];
+                            }
+                            else{
+                                result-=nums[i];
+                            }
+                            k=0;
+                        }
+                        
+                    }
+                    // if(k%2==0){
+                    //     k=0;result+=nums[i];
+                    // }
+                    // else{
+                    //     if(i==0){k=0;result-=nums[i];}
+                    //     else{
+                    //         if(abs(nums[i])<abs(nums[i-1])){
+                    //             result-=nums[i];k=0;
+                    //         }
+                    //         else{
+                    //             result-=nums[i-1];result-=nums[i-1];result+=nums[i];
+                    //             k=0;
+                    //         }
+                    //     }
+                    // }
+                }
+            }return result;
+        }
+    };
+//正确解法【sort为绝对值排序】
+class Solution {
+    public:
+        int largestSumAfterKNegations(vector<int>& nums, int k) {
+            auto cmp = [](int a,int b){return abs(a)>abs(b);};
+            sort(nums.begin(),nums.end(),cmp);//1
+            for(int i = 0;i<nums.size();i++){
+                if(nums[i]<0&&k>0){//第一次贪心
+                    k--;
+                    nums[i]*=(-1);
+                }
+            }
+            if(k%2==0){}
+            else{//第二次贪心
+                nums[nums.size()-1]*=(-1);
+            }
+            int result = 0;
+            for_each(nums.begin(),nums.end(),[&](int num){result+=num;});//4
+            return result;
+        }
+    };
 int main(){
     return 0;
 }

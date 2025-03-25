@@ -28,5 +28,9 @@ int main(){
     auto accumulate = [&](int num){sum+=num;};
     for_each(v_i.begin(),v_i.end(),accumulate);
     printf("sum = %d",sum);
+
+    v_i.insert(v_i.begin(),100);
+    for_each(v_i.begin(),v_i.end(),
+        [](int num){cout<<num<<" ";});//这里就是一个lambda函数
     return 0;
 }
