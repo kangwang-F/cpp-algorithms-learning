@@ -201,6 +201,41 @@ class Solution {
             return dp[m-1][n-1];
         }
     };
+//拆分整数
+//主观理解：把这个整数尽量拆分为k个大小近似的数
+//【10：3，3，4】
+class Solution {
+    public:
+        int integerBreak(int n) {
+            vector<int> dp(n+1,0);
+            dp[1] = 1;//1实际不能拆分，但是后面要用
+            for(int i =2;i<=n;++i){
+                for(int j =1;j<=(i-1)/2;j++){//这里剪枝
+                    //先不拆分j，      【j*拆分i-j】[j*(i-j)]
+                                //还有之前已经比较过的dp[i]
+                    dp[i] = max(dp[i],max(j*dp[i-j],j*(i-j)));
+                }
+            }
+            for_each(dp.begin(),dp.end(),[](int num){cout<<num<<" ";});
+            return dp[n];
+        }
+    };
+//不同的搜索二叉树
+class Solution {
+    public:
+        int numTrees(int n) {
+            vector<int> dp(n+1,0);
+            dp[0] = dp[1] = 1;
+            for(int i = 2;i<=n;i++){
+                for(int j = 0;j<i;j++){
+                    dp[i] += dp[j] * dp[i-j-1];
+                }
+            }
+            //for_each(dp.begin(),dp.end(),[](int num){cout<<num<<" ";});
+            return dp[n];
+            
+        }
+    };
 int main(){
     #define MAXNUM 50
     vector<int> dp(MAXNUM,0);
