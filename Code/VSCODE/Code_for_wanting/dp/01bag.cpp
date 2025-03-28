@@ -93,6 +93,7 @@ class Solution {
 //最后一块石头的重量II
 //两个石头可以相撞【得到的石头重量为 大 - 小】
 //得到两个 和差 尽可能小的子集
+//416. 分割等和子集相当于是求背包是否正好装满，而本题是求背包最多能装多少。
 class Solution {
     public:
         int lastStoneWeightII(vector<int>& stones) {
@@ -116,3 +117,71 @@ class Solution {
             return (sum-dp[target]-dp[target]);
         }
     };
+//目标和 【求有几种方式】
+//【元素可正可负】
+class Solution {
+    public:
+        int findTargetSumWays(vector<int>& nums, int target) {
+            int sum = 0;
+            for(int i : nums){sum+=i;}
+        //target的绝对值比正整数总和都大
+            if(abs(target)>sum)return 0;
+        //left表示目标和中所有正整数和，不能为小鼠
+            if((target+sum)%2)return 0;
+            int left = (target+sum)/2;
+            vector<int> dp(left+1,0);
+            //dp[nums[0]] = 1;
+            //初始化【把dp[0]装满的方法数为1】
+            dp[0] = 1;
+            for(int i = 0;i<nums.size();i++){//物品
+                for(int j =left;j>=nums[i];j--){//背包【倒叙】【单次选择】
+                    dp[j]+=dp[j-nums[i]];
+                }
+            }
+            return dp[left];      
+        }
+    };
+//474.一和零
+/*
+    一个元素直选一次，
+    求请你找出并返回 strs 的最大子集的长度，
+    该子集中 最多 有 m 个 0 和 n 个 1
+*/
+class Solution {
+    public:
+        int findMaxForm(const vector<string>& strs, int m, int n) {
+            vector<vector<int>> dp(m+1,vector<int>(n+1,0));
+            //dp[i][j]:表示装入i个0，j个1最大长度
+            dp[0][0] = 0;
+            for(auto str:strs){//物品
+                int x =0,y = 0;
+                for(auto c:str){
+                    if(c=='0')x++;
+                    else y++;
+                }
+                // for(int i = m,j = n;i>=x&&j>=y;i--,j--){//容量【倒叙】
+                //     // i和j同步减 X，应该两层for
+                //     dp[i][j] = max(dp[i-x][j-y]+1,dp[i][j]);
+                // }
+                for(int i = m;i>=x;i--){
+                    for(int j =n;j>=y;j--){
+                        dp[i][j] = max(dp[i][j],dp[i-x][j-y]+1);
+                    }
+                }
+                //打印
+                // for(auto i:dp){
+                //     for(int j:i){
+                //         cout<<j<<" ";
+                //     }cout<<endl;
+                // }cout<<"****************"<<endl;
+            }
+            return dp[m][n];
+        }
+    };
+/*
+纯 0 - 1 背包 是求 给定背包容量 装满背包 的最大价值是多少。
+416. 分割等和子集 是求 给定背包容量，能不能装满这个背包。
+1049. 最后一块石头的重量 II 是求 给定背包容量，尽可能装，最多能装多少
+494. 目标和 是求 给定背包容量，装满背包有多少种方法。
+本题是求 给定背包容量，装满背包最多有多少个物品。
+*/
