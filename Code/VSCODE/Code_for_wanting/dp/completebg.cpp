@@ -223,3 +223,35 @@ class Solution {
             return dp[s.size()];
         }
     };
+
+//多重背包
+/*
+    某个元素的数量为nums[i];
+        类似为01背包；可以把里面nums[i]个元素拆成一个个等值的对应元素
+*/
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);cout.tie(0);
+    int N,W;
+    cin>>W>>N;
+    vector<int> weight(N,0);
+    vector<int> value(N,0);
+    vector<int> nums(N,0);
+    for(int i = 0;i<N;i++){cin>>weight[i];}
+    for(int i = 0;i<N;i++){cin>>value[i];}
+    for(int i = 0;i<N;i++){cin>>nums[i];}
+    vector<int> dp(W+1,0);
+    dp[0] = 0;
+    for(int i = 0;i<N;i++){//物品
+        for(int j = W;j>=0;j--){//背包
+            for(int k = 1;(k<=nums[i]&&(j-k*weight[i])>=0);k++){
+                //物品的个数展开
+                dp[j] = max(dp[j],dp[j-k*weight[i]]+k * value[i]);
+            }
+        }    
+    }
+    cout<<dp[W];
+    return 0;
+}
